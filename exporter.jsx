@@ -46,13 +46,32 @@ getArtboardIndex = function(artboard) {
     }
     return _idx
 }
+names.forEach(function(name) {
+    hideAllLayers()
 
-artboards.forEach(function(ab) {
-    var idx = getArtboardIndex(ab)
-    docRef.artboards.setActiveArtboardIndex(idx)
-    exportFileToPNG8('~/Desktop/'+ab.name+'.png')
+    map[name].forEach(function(lay) {
+        lay.visible = true
+    })
+
+    artboards.forEach(function(ab) {
+        var idx = getArtboardIndex(ab)
+        docRef.artboards.setActiveArtboardIndex(idx)
+        exportFileToPNG8(getFolder()+'/png/' +name+'-'+ab.name+'.png')
+    })
 })
 
+
+function getFolder() {
+    return docRef.path.toString()
+}
+
+alert(getFolder())
+
+function hideAllLayers() {
+    toArray(docRef.layers).forEach(function(lay) {
+        lay.visible = false
+    })
+}
 
 // Get the parts of a layer name
 function getParts(layer) {
