@@ -2,6 +2,7 @@
 
 var prefix = '@'
 var artboard_labels = ['mw', 'cw', 'fw']
+var scaling = 300
 var docRef = app.activeDocument;
 var allLayers = toArray(docRef.layers) // Mach aus dem komischen Iterable einen Array
 var names = []
@@ -164,12 +165,13 @@ run_export = function() {
 
 function exportFileToPNG8(dest) {
     if (app.documents.length > 0) {
-      var exportOptions = new ExportOptionsPNG8();
-      exportOptions.colorCount = 8;
+      var exportOptions = new ExportOptionsPNG24();
       exportOptions.transparency = false;
       exportOptions.artBoardClipping = true
-  
-      var type = ExportType.PNG8;
+      exportOptions.verticalScale = scaling
+      exportOptions.horizontalScale = scaling
+
+      var type = ExportType.PNG24;
       var fileSpec = new File(dest);
   
       app.activeDocument.exportFile(fileSpec, type, exportOptions);
