@@ -1,5 +1,13 @@
 //@include "array.jsx"
 
+/*
+Inspired by:
+* https://gist.github.com/larrybotha/5baf6a9aea8da574cbbe
+* http://www.ericson.net/content/2011/06/export-illustrator-layers-andor-artboards-as-pngs-and-pdfs/
+
+* ExtendScript-Documentation: https://ai-scripting.docsforadobe.dev/objectmodel/objectModel.html
+*/
+
 var prefix = '@'
 var artboard_labels = ['mw', 'cw', 'fw']
 var scaling = 300
@@ -10,7 +18,7 @@ var map = {}
 var artboards = []
 
 
-// Welche namen gibt es?
+// Welche Namen gibt es?
 allLayers.forEach(function(layer) {
     var _names = getNames(getParts(layer)) // Split bei den Leerstellen und gib mir alles mit dem richtigen Präfix
     _names.forEach(function(n) {
@@ -38,6 +46,7 @@ artboards = toArray(docRef.artboards).filter(function(a) {
     return _state
 })
 
+// Index eines Artboards finden – um es dann zu aktivieren
 getArtboardIndex = function(artboard) {
     var _idx = null
     for(var i=0;i<docRef.artboards.length;i++) {
@@ -47,6 +56,8 @@ getArtboardIndex = function(artboard) {
     }
     return _idx
 }
+
+// main loop
 names.forEach(function(name) {
     hideAllLayers()
 
@@ -62,12 +73,12 @@ names.forEach(function(name) {
 })
 
 
+// Ordner des aktiven Dokuments
 function getFolder() {
     return docRef.path.toString()
 }
 
-alert(getFolder())
-
+// Alle Top-Layer ausblenden
 function hideAllLayers() {
     toArray(docRef.layers).forEach(function(lay) {
         lay.visible = false
@@ -89,6 +100,7 @@ function removeAt(part) {
     return part.replace(prefix, '')
 }
 
+// Prüft ob ein Element in einem Array vorkommt
 function inArray(arr, el) {
     for(var i=0;i<arr.length; i++) {
         if(arr[i] == el) {return true}
@@ -96,6 +108,7 @@ function inArray(arr, el) {
     return false
 }
 
+// Wandelt seltsame, iterierbare Objekte in ein Array um
 function toArr(iteratable) {
     var _arr = []
     for(var i=0; i<iteratable.length; i++) {
@@ -105,64 +118,7 @@ function toArr(iteratable) {
 }
 
 
-getPng8Options = function ( transparency, scaling ) {
-	var options = new ExportOptionsPNG8();
-	options.antiAliasing = true;
-	options.transparency = transparency; 
-	options.artBoardClipping = true;
-	options.horizontalScale = scaling;
-	options.verticalScale = scaling;
-	return options;
-}
-
-// Format specific save functions
-savePng8 = function ( doc, filePath, options ) {
-	var destFile = new File( filePath + '.png' );
-	doc.exportFile(destFile, ExportType.PNG8 , options);
-}
-
-indexOf = function ( array, element ) {
-    for(var i=0; i<array.length; i++){
-        if(array[i]==element)return i;
-    }
-    return -1;
-}
-
-hide_all_layers = function() {
-    var n = docRef.layers.length;
-    
-    for(var i=0; i<n; ++i) {
-        
-        layer = docRef.layers[i];
-        layer.visible = false
-    }
-}
-
-//hide_all_layers()
-
-
-run_export = function() {
-    this.failed_artboards = [];
-    this.failed_layers = [];
-    var formatInfo = {
-        name:"PNG 8", 
-        copyBehaviour:false, 
-        pixelDocSize:true, 
-        getOptions:getPng8Options, 
-        saveFile:savePng8,
-        activeControls:["scalingInput","transCheckBox","trimEdgesCheckBox","innerPaddingCheckBox"]
-    }
-
-    var options = formatInfo.getOptions(
-        true, //transparency 
-        '300%' //scaling 
-        );
-        
-        formatInfo.saveFile(docRef, "~/Desktop/test", options, 1, 'mw');
-        
-}
-
-
+// Export-Funktion
 function exportFileToPNG8(dest) {
     if (app.documents.length > 0) {
       var exportOptions = new ExportOptionsPNG24();
