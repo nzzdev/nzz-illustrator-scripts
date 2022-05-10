@@ -1,4 +1,3 @@
-
 /*
 Inspired by:
 * https://gist.github.com/larrybotha/5baf6a9aea8da574cbbe
@@ -185,7 +184,10 @@ function main(config) {
         artboards.forEach(function(ab) {
             var idx = getArtboardIndex(ab)
             docRef.artboards.setActiveArtboardIndex(idx)
-            exportFileToPNG8(getFolder()+'/png/' +name+'-'+ab.name+'.png', config)
+            exportFileToPNG8(
+                buildPath(config.outputDir, name, ab.name), // Construct the path of the output dir
+                config.scaling // Read the user selected scaling factor in percent
+            )
         })
     })
     this.dlg.close();
@@ -193,9 +195,13 @@ function main(config) {
 
 
 
+function buildPath(folder, name, artboard) {
+    return folder+"/"+name+'-'+artboard+'.png'
+}
+
 // Ordner des aktiven Dokuments
 function getFolder() {
-    return docRef.path.toString()
+    return docRef.path.toString() + '/png'
 }
 
 // Alle Top-Layer ausblenden
@@ -222,14 +228,13 @@ function removeAt(part) {
 
 
 // Export-Funktion
-function exportFileToPNG8(dest, config) {
-    
+function exportFileToPNG8(dest, scaling) {
     if (app.documents.length > 0) {
       var exportOptions = new ExportOptionsPNG24();
       exportOptions.transparency = false;
       exportOptions.artBoardClipping = true
-      exportOptions.verticalScale = config.scaling
-      exportOptions.horizontalScale = config.scaling
+      exportOptions.verticalScale = scaling
+      exportOptions.horizontalScale = scaling
 
       var type = ExportType.PNG24;
       var fileSpec = new File(dest);
@@ -240,11 +245,10 @@ function exportFileToPNG8(dest, config) {
 }
 
 function scaling(scaleString) {
-    alert(scaleString == '1x')
     if(scaleString == '1x') {return 100}
     else if(scaleString == '2x') {return 200}
     else if(scaleString == '3x') {return 300}
-    else {return 600}
+    else {return 300}
 }
 
 
@@ -260,6 +264,7 @@ function showDialog () {
     typeGrp.alignment = [ScriptUI.Alignment.LEFT, ScriptUI.Alignment.TOP]
 
     var exportTypeList = typeGrp.add('dropdownlist', undefined, [ '1x', '2x', '3x' ]);
+    exportTypeList.selection = exportTypeList.items[2]
 
 
 
@@ -271,12 +276,11 @@ function showDialog () {
     var dirSt = dirGrp.add('statictext', undefined, 'Zielordner:'); 
     dirSt.size = [ 100,20 ];
 
-    var dirEt = dirGrp.add('edittext', undefined, this.base_path); 
+    var dirEt = dirGrp.add('edittext', undefined, getFolder()); 
     dirEt.size = [ 300,20 ];
 
     var chooseBtn = dirGrp.add('button', undefined, 'Auswählen ...' );
     chooseBtn.onClick = function() { dirEt.text = Folder.selectDialog(); }
-
 
 
     var btnPnl = this.dlg.add('group', undefined, ''); 
@@ -288,8 +292,10 @@ function showDialog () {
     // OK button
     btnPnl.okBtn = btnPnl.add('button', undefined, 'Export', {name:'ok'});
     btnPnl.okBtn.onClick = function() {
+        alert(dirEt.text)
         main({
-            scaling: scaling(exportTypeList.selection.text)
+            scaling: scaling(exportTypeList.selection.text),
+            outputDir: dirEt.text
         });
     };
 
