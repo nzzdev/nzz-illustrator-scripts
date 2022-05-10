@@ -14,6 +14,7 @@ Inspired by:
 ======================= Array functions =======================
 */
 
+// Creates arrays from iterable, non-array objects
 toArray = function(iteratable) {
     var _arr = []
     for(var i=0; i<iteratable.length; i++) {
@@ -22,7 +23,7 @@ toArray = function(iteratable) {
     return _arr
 }
 
-
+// Array -> Array
 Array.prototype.map = function (callback) {
     var that = Object(this)
     var _arr = []
@@ -32,6 +33,7 @@ Array.prototype.map = function (callback) {
     return _arr
 }
 
+// Array -> Array
 Array.prototype.filter = function (callback) {
     var _arr = []
     for(var i=0; i<this.length;i++) {
@@ -43,14 +45,7 @@ Array.prototype.filter = function (callback) {
 }
 
 
-
-
-/**
- *
- * @param {Function} callback function to apply on each element
- * @param {Object} thisArg object to use as this when callback parameter is executed
- * @todo add forEach function for array and collection
- */
+// Array -> None
  Array.prototype.forEach = function forEach (callback, thisArg) {
     'use strict';
     var T, k;
@@ -105,6 +100,16 @@ Array.prototype.filter = function (callback) {
   };
 
 
+// Prüft ob ein Element in einem Array vorkommt
+// Array -> Any -> Bool
+Array.prototype.inArray = function(el) {
+    for(var i=0; i<this.length; i++) {
+        if(this[i] == el) {return true}
+    }
+    return false
+}
+
+
 /*
 ==================== Main config ================
 */
@@ -118,7 +123,6 @@ Possible options-dialog:
 
 var prefix = '@'
 var artboard_labels = ['mw', 'cw', 'fw']
-var scaling = 300
 var docRef = app.activeDocument;
 var allLayers = toArray(docRef.layers) // Mach aus dem komischen Iterable einen Array
 var names = []
@@ -132,7 +136,7 @@ allLayers.forEach(function(layer) {
     _names.forEach(function(n) {
         n = removeAt(n) // Entfernt das Präfix
 
-        if(!inArray(names, n)) {
+        if(!names.inArray(n)) {
             names.push(n)
         }
     })
@@ -168,19 +172,25 @@ getArtboardIndex = function(artboard) {
 /*
 ================ Main loop ===================
 */
-names.forEach(function(name) {
-    hideAllLayers()
 
-    map[name].forEach(function(lay) {
-        lay.visible = true
-    })
+function main(config) {
 
-    artboards.forEach(function(ab) {
-        var idx = getArtboardIndex(ab)
-        docRef.artboards.setActiveArtboardIndex(idx)
-        exportFileToPNG8(getFolder()+'/png/' +name+'-'+ab.name+'.png')
+    names.forEach(function(name) {
+        hideAllLayers()
+    
+        map[name].forEach(function(lay) {
+            lay.visible = true
+        })
+    
+        artboards.forEach(function(ab) {
+            var idx = getArtboardIndex(ab)
+            docRef.artboards.setActiveArtboardIndex(idx)
+            exportFileToPNG8(getFolder()+'/png/' +name+'-'+ab.name+'.png', config)
+        })
     })
-})
+    this.dlg.close();
+}
+
 
 
 // Ordner des aktiven Dokuments
@@ -210,40 +220,82 @@ function removeAt(part) {
     return part.replace(prefix, '')
 }
 
-// Prüft ob ein Element in einem Array vorkommt
-function inArray(arr, el) {
-    for(var i=0;i<arr.length; i++) {
-        if(arr[i] == el) {return true}
-    }
-    return false
-}
-
-// Wandelt seltsame, iterierbare Objekte in ein Array um
-function toArr(iteratable) {
-    var _arr = []
-    for(var i=0; i<iteratable.length; i++) {
-        _arr.push(iteratable[0])
-    }
-    return _arr
-}
-
 
 // Export-Funktion
-function exportFileToPNG8(dest) {
+function exportFileToPNG8(dest, config) {
+    
     if (app.documents.length > 0) {
       var exportOptions = new ExportOptionsPNG24();
       exportOptions.transparency = false;
       exportOptions.artBoardClipping = true
-      exportOptions.verticalScale = scaling
-      exportOptions.horizontalScale = scaling
+      exportOptions.verticalScale = config.scaling
+      exportOptions.horizontalScale = config.scaling
 
       var type = ExportType.PNG24;
       var fileSpec = new File(dest);
   
       app.activeDocument.exportFile(fileSpec, type, exportOptions);
     }
-  }
+
+}
+
+function scaling(scaleString) {
+    alert(scaleString == '1x')
+    if(scaleString == '1x') {return 100}
+    else if(scaleString == '2x') {return 200}
+    else if(scaleString == '3x') {return 300}
+    else {return 600}
+}
 
 
-  
- 
+
+function showDialog () {
+
+    this.dlg = new Window('dialog', 'Export Artboards'); 
+    var msgPnl = this.dlg.add('panel', undefined, 'Auflösung'); 
+
+    // Auflösung
+    var typeGrp = msgPnl.add('group', undefined, '')
+    typeGrp.oreintation = 'row';
+    typeGrp.alignment = [ScriptUI.Alignment.LEFT, ScriptUI.Alignment.TOP]
+
+    var exportTypeList = typeGrp.add('dropdownlist', undefined, [ '1x', '2x', '3x' ]);
+
+
+
+    // DIR GROUP
+    var dirGrp = msgPnl.add( 'group', undefined, '') 
+    dirGrp.orientation = 'row'
+    dirGrp.alignment = [ScriptUI.Alignment.LEFT, ScriptUI.Alignment.TOP]
+    
+    var dirSt = dirGrp.add('statictext', undefined, 'Zielordner:'); 
+    dirSt.size = [ 100,20 ];
+
+    var dirEt = dirGrp.add('edittext', undefined, this.base_path); 
+    dirEt.size = [ 300,20 ];
+
+    var chooseBtn = dirGrp.add('button', undefined, 'Auswählen ...' );
+    chooseBtn.onClick = function() { dirEt.text = Folder.selectDialog(); }
+
+
+
+    var btnPnl = this.dlg.add('group', undefined, ''); 
+    btnPnl.orientation = 'row'
+
+    btnPnl.cancelBtn = btnPnl.add('button', undefined, 'Cancel', {name:'cancel'});
+    btnPnl.cancelBtn.onClick = function() { this.dlg.close() };
+
+    // OK button
+    btnPnl.okBtn = btnPnl.add('button', undefined, 'Export', {name:'ok'});
+    btnPnl.okBtn.onClick = function() {
+        main({
+            scaling: scaling(exportTypeList.selection.text)
+        });
+    };
+
+    this.dlg.show();
+}
+
+
+
+showDialog()
