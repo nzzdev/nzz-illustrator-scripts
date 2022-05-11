@@ -123,11 +123,28 @@ Possible options-dialog:
 var prefix = '@'
 var artboard_labels = ['mw', 'cw', 'fw']
 var docRef = app.activeDocument;
-var allLayers = toArray(docRef.layers) // Mach aus dem komischen Iterable einen Array
+var allLayers = getAllLayers(docRef) // Mach aus dem komischen Iterable einen Array
 var names = []
 var map = {}
 var artboards = []
 
+function getAllLayers(docRef) {
+    layers = []
+    toArray(docRef.layers).forEach(function(l1) {
+        if(l1.layers.length > 0) {
+            toArray(l1.layers).forEach(function(l2) {
+                if(inLayerName(prefix, l2)) {layers.push(l2)}
+            })
+        }
+        if(inLayerName(prefix, l1)) {layers.push(l1)}
+    })
+    return layers
+}
+
+
+function inLayerName(string, layer) {
+    return layer.name.indexOf(string) !== -1
+}
 
 // Welche Namen gibt es?
 allLayers.forEach(function(layer) {
@@ -144,7 +161,7 @@ allLayers.forEach(function(layer) {
 // Welcher Layer enthält welchen Namen
 names.forEach(function(n) {
     map[n] = allLayers.filter(function(l) {
-        return l.name.indexOf(prefix+n) !== -1
+        return inLayerName(prefix+n, l); 
     })
 })
 
@@ -206,7 +223,7 @@ function getFolder() {
 
 // Alle Top-Layer ausblenden
 function hideAllLayers() {
-    toArray(docRef.layers).forEach(function(lay) {
+    allLayers.forEach(function(lay) {
         lay.visible = false
     })
 }
