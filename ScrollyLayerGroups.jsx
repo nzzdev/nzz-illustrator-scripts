@@ -99,7 +99,7 @@ Array.prototype.filter = function (callback) {
   };
 
 
-// Prüft ob ein Element in einem Array vorkommt
+// Pr√ºft ob ein Element in einem Array vorkommt
 // Array -> Any -> Bool
 Array.prototype.inArray = function(el) {
     for(var i=0; i<this.length; i++) {
@@ -114,17 +114,13 @@ Array.prototype.inArray = function(el) {
 */
 
 /*
-Possible options-dialog:
-- Prefix
 */
 
 var prefix = '@'
-var artboard_labels = ['mw', 'cw', 'fw'] // Only export artboards that contain one of these strings
 var docRef = app.activeDocument;
 var allLayers = getAllLayers(docRef) // Only touch (show and hide) layers that contain the prefix
 var names = [] // A list 'states' of the scrollytelling. Eg. @1 @2 @3 -> ['1', '2', '3']
 var map = {} // Find all layers for a given state. E. g. { '1': [bg @1 @2, @1], '2': [bg @1 @2, @2] }
-var artboards = [] // Artboards containing the artboard_labels
 
 function getAllLayers(docRef) {
     layers = []
@@ -146,9 +142,9 @@ function inLayerName(string, layer) {
 
 // Welche Namen gibt es?
 allLayers.forEach(function(layer) {
-    var _names = getNames(getParts(layer)) // Split bei den Leerstellen und gib mir alles mit dem richtigen Präfix
+    var _names = getNames(getParts(layer)) // Split bei den Leerstellen und gib mir alles mit dem richtigen Pr√§fix
     _names.forEach(function(n) {
-        n = removeAt(n) // Entfernt das Präfix
+        n = removeAt(n) // Entfernt das Pr√§fix
 
         if(!names.inArray(n)) {
             names.push(n)
@@ -156,23 +152,14 @@ allLayers.forEach(function(layer) {
     })
 })
 
-// Welcher Layer enthält welchen Namen
+// Welcher Layer enth√§lt welchen Namen
 names.forEach(function(n) {
     map[n] = allLayers.filter(function(l) {
         return inLayerName(prefix+n, l); 
     })
 })
 
-// Artboards die wir exportieren wollen
-artboards = toArray(docRef.artboards).filter(function(a) {
-    var _state = false
-    artboard_labels.forEach(function(al) {
-        if(a.name.indexOf(al) !== -1) {_state = true}
-    })
-    return _state
-})
-
-// Index eines Artboards finden – um es dann zu aktivieren
+// Index eines Artboards finden ‚Äì um es dann zu aktivieren
 getArtboardIndex = function(artboard) {
     var _idx = null
     for(var i=0;i<docRef.artboards.length;i++) {
@@ -187,36 +174,13 @@ getArtboardIndex = function(artboard) {
 ================ Main loop ===================
 */
 
-function main(config) {
+function main(state) {
 
-    names.forEach(function(name) {
-        hideAllLayers()
-    
-        map[name].forEach(function(lay) {
-            lay.visible = true
-        })
-    
-        artboards.forEach(function(ab) {
-            var idx = getArtboardIndex(ab)
-            docRef.artboards.setActiveArtboardIndex(idx)
-            exportFileToPNG8(
-                buildPath(config.outputDir, name, ab.name), // Construct the path of the output dir
-                config.scaling // Read the user selected scaling factor in percent
-            )
-        })
+    hideAllLayers();
+    map[state].forEach(function(lay) {
+        lay.visible = true
     })
     this.dlg.close();
-}
-
-
-
-function buildPath(folder, name, artboard) {
-    return folder+"/"+name+'-'+artboard+'.png'
-}
-
-// Ordner des aktiven Dokuments
-function getFolder() {
-    return docRef.path.toString() + '/png'
 }
 
 // Alle Top-Layer ausblenden
@@ -242,60 +206,21 @@ function removeAt(part) {
 }
 
 
-// Export-Funktion
-function exportFileToPNG8(dest, scaling) {
-    if (app.documents.length > 0) {
-      var exportOptions = new ExportOptionsPNG24();
-      exportOptions.transparency = false;
-      exportOptions.artBoardClipping = true
-      exportOptions.verticalScale = scaling
-      exportOptions.horizontalScale = scaling
-
-      var type = ExportType.PNG24;
-      var fileSpec = new File(dest);
-  
-      app.activeDocument.exportFile(fileSpec, type, exportOptions);
-    }
-
-}
-
-function scaling(scaleString) {
-    if(scaleString == '1x') {return 100}
-    else if(scaleString == '2x') {return 200}
-    else if(scaleString == '3x') {return 300}
-    else {return 300}
-}
-
-
 
 function showDialog () {
 
-    this.dlg = new Window('dialog', 'Scrolly: Alle Etappen exportieren'); 
-    var msgPnl = this.dlg.add('panel', undefined, 'Auflösung'); 
+    this.dlg = new Window('dialog', 'Scrolly: Etappe anzeigen'); 
+    var msgPnl = this.dlg.add('panel', undefined, 'Etappe'); 
 
-    // Auflösung
+    // Aufl√∂sung
     var typeGrp = msgPnl.add('group', undefined, '')
     typeGrp.oreintation = 'row';
     typeGrp.alignment = [ScriptUI.Alignment.LEFT, ScriptUI.Alignment.TOP]
 
-    var exportTypeList = typeGrp.add('dropdownlist', undefined, [ '1x', '2x', '3x' ]);
-    exportTypeList.selection = exportTypeList.items[2]
+    var exportTypeList = typeGrp.add('dropdownlist', undefined, names);
+    exportTypeList.selection = exportTypeList.items[0]
 
 
-
-    // DIR GROUP
-    var dirGrp = msgPnl.add( 'group', undefined, '') 
-    dirGrp.orientation = 'row'
-    dirGrp.alignment = [ScriptUI.Alignment.LEFT, ScriptUI.Alignment.TOP]
-    
-    var dirSt = dirGrp.add('statictext', undefined, 'Zielordner:'); 
-    dirSt.size = [ 100,20 ];
-
-    var dirEt = dirGrp.add('edittext', undefined, getFolder()); 
-    dirEt.size = [ 300,20 ];
-
-    var chooseBtn = dirGrp.add('button', undefined, 'Auswählen ...' );
-    chooseBtn.onClick = function() { dirEt.text = Folder.selectDialog(); }
 
 
     var btnPnl = this.dlg.add('group', undefined, ''); 
@@ -305,12 +230,9 @@ function showDialog () {
     btnPnl.cancelBtn.onClick = function() { this.dlg.close() };
 
     // OK button
-    btnPnl.okBtn = btnPnl.add('button', undefined, 'Exportieren', {name:'ok'});
+    btnPnl.okBtn = btnPnl.add('button', undefined, 'Anzeigen', {name:'ok'});
     btnPnl.okBtn.onClick = function() {
-        main({
-            scaling: scaling(exportTypeList.selection.text),
-            outputDir: dirEt.text
-        });
+        main(exportTypeList.selection.text)
     };
 
     this.dlg.show();
