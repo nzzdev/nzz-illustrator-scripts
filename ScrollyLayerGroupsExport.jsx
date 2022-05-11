@@ -199,9 +199,10 @@ function main(config) {
         artboards.forEach(function(ab) {
             var idx = getArtboardIndex(ab)
             docRef.artboards.setActiveArtboardIndex(idx)
-            exportFileToPNG8(
+            exportFile(
                 buildPath(config.outputDir, name, ab.name), // Construct the path of the output dir
-                config.scaling // Read the user selected scaling factor in percent
+                config.scaling, // Read the user selected scaling factor in percent
+                config.quality // PNG8 or PNG24
             )
         })
     })
@@ -243,17 +244,16 @@ function removeAt(part) {
 
 
 // Export-Funktion
-function exportFileToPNG8(dest, scaling) {
+function exportFile(dest, scaling, quality) {
     if (app.documents.length > 0) {
-      var exportOptions = new ExportOptionsPNG24();
+      var exportOptions = quality === 'PNG8' ? new ExportOptionsPNG8() : new ExportOptionsPNG24() // TODO: Refactor this out
       exportOptions.transparency = false;
       exportOptions.artBoardClipping = true
       exportOptions.verticalScale = scaling
       exportOptions.horizontalScale = scaling
 
-      var type = ExportType.PNG24;
+      var type = quality === 'PNG8' ? ExportType.PNG8 : ExportType.PNG24; // TODO: Refactor this out
       var fileSpec = new File(dest);
-  
       app.activeDocument.exportFile(fileSpec, type, exportOptions);
     }
 
@@ -267,11 +267,10 @@ function scaling(scaleString) {
 }
 
 
-
 function showDialog () {
 
     this.dlg = new Window('dialog', 'Scrolly: Alle Etappen exportieren'); 
-    var msgPnl = this.dlg.add('panel', undefined, 'Auflösung'); 
+    var msgPnl = this.dlg.add('panel', undefined, 'Auflösung und Qualität'); 
 
     // Auflösung
     var typeGrp = msgPnl.add('group', undefined, '')
@@ -282,6 +281,13 @@ function showDialog () {
     exportTypeList.selection = exportTypeList.items[2]
 
 
+    // Qualität
+    var dirGrp = msgPnl.add( 'group', undefined, '') 
+    dirGrp.orientation = 'row'
+    dirGrp.alignment = [ScriptUI.Alignment.LEFT, ScriptUI.Alignment.TOP]
+
+    var qualityList = typeGrp.add('dropdownlist', undefined, [ 'PNG8', 'PNG24' ]);
+    qualityList.selection = qualityList.items[1] 
 
     // DIR GROUP
     var dirGrp = msgPnl.add( 'group', undefined, '') 
@@ -309,6 +315,7 @@ function showDialog () {
     btnPnl.okBtn.onClick = function() {
         main({
             scaling: scaling(exportTypeList.selection.text),
+            quality: qualityList.selection.text,
             outputDir: dirEt.text
         });
     };
