@@ -99,7 +99,7 @@ Array.prototype.filter = function (callback) {
   };
 
 
-// Pr√ºft ob ein Element in einem Array vorkommt
+// Prüft ob ein Element in einem Array vorkommt
 // Array -> Any -> Bool
 Array.prototype.inArray = function(el) {
     for(var i=0; i<this.length; i++) {
@@ -116,17 +116,15 @@ Array.prototype.inArray = function(el) {
 /*
 Possible options-dialog:
 - Prefix
-- Scaling
-- Export Location
 */
 
 var prefix = '@'
-var artboard_labels = ['mw', 'cw', 'fw']
+var artboard_labels = ['mw', 'cw', 'fw'] // Only export artboards that contain one of these strings
 var docRef = app.activeDocument;
-var allLayers = getAllLayers(docRef) // Mach aus dem komischen Iterable einen Array
-var names = []
-var map = {}
-var artboards = []
+var allLayers = getAllLayers(docRef) // Only touch (show and hide) layers that contain the prefix
+var names = [] // A list 'states' of the scrollytelling. Eg. @1 @2 @3 -> ['1', '2', '3']
+var map = {} // Find all layers for a given state. E. g. { '1': [bg @1 @2, @1], '2': [bg @1 @2, @2] }
+var artboards = [] // Artboards containing the artboard_labels
 
 function getAllLayers(docRef) {
     layers = []
@@ -148,9 +146,9 @@ function inLayerName(string, layer) {
 
 // Welche Namen gibt es?
 allLayers.forEach(function(layer) {
-    var _names = getNames(getParts(layer)) // Split bei den Leerstellen und gib mir alles mit dem richtigen Pr√§fix
+    var _names = getNames(getParts(layer)) // Split bei den Leerstellen und gib mir alles mit dem richtigen Präfix
     _names.forEach(function(n) {
-        n = removeAt(n) // Entfernt das Pr√§fix
+        n = removeAt(n) // Entfernt das Präfix
 
         if(!names.inArray(n)) {
             names.push(n)
@@ -158,7 +156,7 @@ allLayers.forEach(function(layer) {
     })
 })
 
-// Welcher Layer enth√§lt welchen Namen
+// Welcher Layer enthält welchen Namen
 names.forEach(function(n) {
     map[n] = allLayers.filter(function(l) {
         return inLayerName(prefix+n, l); 
@@ -174,7 +172,7 @@ artboards = toArray(docRef.artboards).filter(function(a) {
     return _state
 })
 
-// Index eines Artboards finden ‚Äì um es dann zu aktivieren
+// Index eines Artboards finden – um es dann zu aktivieren
 getArtboardIndex = function(artboard) {
     var _idx = null
     for(var i=0;i<docRef.artboards.length;i++) {
@@ -273,9 +271,9 @@ function scaling(scaleString) {
 function showDialog () {
 
     this.dlg = new Window('dialog', 'Export Artboards'); 
-    var msgPnl = this.dlg.add('panel', undefined, 'Aufl√∂sung'); 
+    var msgPnl = this.dlg.add('panel', undefined, 'Auflösung'); 
 
-    // Aufl√∂sung
+    // Auflösung
     var typeGrp = msgPnl.add('group', undefined, '')
     typeGrp.oreintation = 'row';
     typeGrp.alignment = [ScriptUI.Alignment.LEFT, ScriptUI.Alignment.TOP]
@@ -296,7 +294,7 @@ function showDialog () {
     var dirEt = dirGrp.add('edittext', undefined, getFolder()); 
     dirEt.size = [ 300,20 ];
 
-    var chooseBtn = dirGrp.add('button', undefined, 'Ausw√§hlen ...' );
+    var chooseBtn = dirGrp.add('button', undefined, 'Auswählen ...' );
     chooseBtn.onClick = function() { dirEt.text = Folder.selectDialog(); }
 
 
