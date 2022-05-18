@@ -212,16 +212,27 @@ function showDialog () {
     this.dlg = new Window('dialog', 'Scrolly: Etappe anzeigen'); 
     var msgPnl = this.dlg.add('panel', undefined, 'Etappe'); 
 
-    // Auflösung
+
     var typeGrp = msgPnl.add('group', undefined, '')
     typeGrp.oreintation = 'row';
     typeGrp.alignment = [ScriptUI.Alignment.LEFT, ScriptUI.Alignment.TOP]
 
-    var exportTypeList = typeGrp.add('dropdownlist', undefined, names);
+    /*
+    var exportTypeList = typeGrp.add('dropdownlist', undefined, names.sort());
     exportTypeList.selection = exportTypeList.items[0]
 
+    */
 
 
+    names.sort().forEach(function(name) {
+        var btnPnl = msgPnl.add('group', undefined, ''); 
+        btnPnl.orientation = 'row'
+
+        btnPnl[name] = btnPnl.add('button', undefined, name, {name: name})
+        btnPnl[name].onClick = function() {
+            main(name)
+        }
+    })
 
     var btnPnl = this.dlg.add('group', undefined, ''); 
     btnPnl.orientation = 'row'
@@ -230,11 +241,12 @@ function showDialog () {
     btnPnl.cancelBtn.onClick = function() { this.dlg.close() };
 
     // OK button
+    /*
     btnPnl.okBtn = btnPnl.add('button', undefined, 'Anzeigen', {name:'ok'});
     btnPnl.okBtn.onClick = function() {
         main(exportTypeList.selection.text)
     };
-
+    */
     this.dlg.show();
 }
 
