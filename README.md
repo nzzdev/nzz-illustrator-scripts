@@ -7,6 +7,10 @@ Illustrator-Skripts für die Grafik-Produktion bei NZZ Visuals.
 * Danach folgenden Befehl kopieren, einfügen und ausführen: `sudo git clone https://github.com/jonasoesch/nzz-illustrator-scripts .`
 * Illustrator neu starten
 
+Der Befehl funktioniert nur, wenn der `Skripten`-Ordner vorher leer ist. Ist Illustrator auf Englisch oder einer anderen Sprache installiert, kann der Ordnernamen im ersten Befehl leicht variieren. Statt `de_DE` zum Beispiel `en_GB`.
+
+Alternativ kann man die Skripte auch von Hand in Ordner `/Applications/Adobe Illustrator 2022/Presets.l/de_DE/Skripten` kopiert werden. Dazu auf [https://github.com/nzzdev/nzz-illustrator-scripts](https://github.com/nzzdev/nzz-illustrator-scripts) oben rechts auf "Code" und danach auf "Download ZIP" klicken.
+
 ## Verwendung
 
 Die Skripte finden sich danach in Illustrator unter `Datei -> Skripten`
@@ -32,3 +36,8 @@ Auflösung, Bittiefe und Exportordner können eingestellt werden.
 ## ai2html
 
 Exportiert Texte als HTML und den Rest als Bilder. 
+
+
+## Skripte mit einem Tastaturkurzbefehl starten
+
+Das ist in Illustrator leider etwas kompliziert, lässt sich aber machen, indem man eine Action erstellt. [Anleitung](https://creative-scripts.com/keyboard-shortcuts-for-illustrator-scripts/)
