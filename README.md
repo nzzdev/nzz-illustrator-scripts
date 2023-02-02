@@ -37,6 +37,12 @@ Auflösung, Bittiefe und Exportordner können eingestellt werden.
 
 Exportiert Texte als HTML und den Rest als Bilder. 
 
+## area.jsx
+
+Berechnet die Fläche einer Form (oder die kumulierte Fläche von mehreren Formen).
+Anzeige in in² und cm².
+Basiert auf einem Script von hier: [Calculating Area in Adobe Illustrator - Graphics Mob](https://graphicsmob.com/how-to-calculate-area-in-adobe-illustrator/)
+
 
 ## Skripte mit einem Tastaturkurzbefehl starten
 
