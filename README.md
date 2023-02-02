@@ -41,3 +41,9 @@ Exportiert Texte als HTML und den Rest als Bilder.
 ## Skripte mit einem Tastaturkurzbefehl starten
 
 Das ist in Illustrator leider etwas kompliziert, lässt sich aber machen, indem man eine Action erstellt. [Anleitung](https://creative-scripts.com/keyboard-shortcuts-for-illustrator-scripts/)
+
+## area.jsx
+
+Berechnet die Fläche einer Form (oder die kumulierte Fläche von mehreren Formen).
+Anzeige in in² und cm².
+Basiert auf einem Script von hier: [Calculating Area in Adobe Illustrator - Graphics Mob](https://graphicsmob.com/how-to-calculate-area-in-adobe-illustrator/)
